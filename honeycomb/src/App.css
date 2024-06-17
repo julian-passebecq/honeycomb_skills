@@ -1,0 +1,23 @@
+.skills-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.skill-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  padding: 0;
+  margin: 10px 0;
+  list-style: none;
+}
+
+.skill {
+  width: 100px;
+  margin: 0 5px -20px 5px;
+}
+
+.skill img {
+  width: 100px;
+}

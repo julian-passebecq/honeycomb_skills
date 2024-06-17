@@ -1,0 +1,15 @@
+.skills-container {
+    .skill-list {
+        display: flex;
+        justify-content: center;
+        &:nth-child(odd) {
+            margin-left: 60px; /* Adjust this value as needed */
+        }
+        .skill {
+            margin: 0 5px;
+            img {
+                width: 100px;
+            }
+        }
+    }
+}
