@@ -4,13 +4,17 @@ import _ from 'lodash';
 import { Element } from 'react-scroll';
 import './toolbelt.css';
 import skills from './skills';
+import biIcon from './bigcategory_images/BI.png';
+import mlIcon from './bigcategory_images/ML.png';
+import jsIcon from './bigcategory_images/Js.png';
+import cloudIcon from './bigcategory_images/Cloud.png';
 
 class Toolbelt extends React.Component {
     constructor(props) {
         super(props);
-        this.state = { resized: false, hoverEffect: false, windowWidth: $(window).width() };
         this.hoverEffect = this.hoverEffect.bind(this);
-        this.cancelHoverEffect = this.cancelHoverEffect.bind(this);
+        this.cancelHoverEffect = this.hoverEffect.bind(this);
+        this.state = { resized: false, hoverEffect: false, windowWidth: $(window).width() };
     }
 
     componentDidMount() {
@@ -40,22 +44,16 @@ class Toolbelt extends React.Component {
         this.setState({ hoverEffect: this.state.hoverEffect !== i ? i : false });
     }
 
-    cancelHoverEffect() {
-        this.setState({ hoverEffect: false });
-    }
-
-    render() {
-        const { windowWidth } = this.state;
+    renderSkills() {
         let skillWidth = 110;
-        let margin = 80;
-        let maxSkillsInOneList = Math.floor((windowWidth - margin * 2) / skillWidth);
-
+        let margin = 180;
+        let maxSkillsInOneList = 3; // First row has 3 icons
         const cutoffpoint = 641;
 
-        if (windowWidth < cutoffpoint) {
+        if (this.state.windowWidth < cutoffpoint) {
             skillWidth = 64;
             margin = 64;
-            maxSkillsInOneList = Math.floor((windowWidth - margin * 2) / skillWidth);
+            maxSkillsInOneList = 3; // First row has 3 icons
         }
 
         let skillsetItems = skills.map((skill, i) => {
@@ -63,7 +61,7 @@ class Toolbelt extends React.Component {
             if (this.state.hoverEffect === i) {
                 skillClasses += ' hover';
                 return (
-                    <li key={i} className={skillClasses} data-name={skill.name} onMouseLeave={this.hoverEffect.bind(this, i)}>
+                    <li key={i} className={skillClasses} data-name={skill.name} onMouseLeave={() => this.hoverEffect(i)}>
                         <img src={skill.img} alt="skill" />
                     </li>
                 );
@@ -71,59 +69,58 @@ class Toolbelt extends React.Component {
                 skillClasses += ' unselected';
             }
             return (
-                <li key={i} className={skillClasses} data-name={skill.name} onMouseOver={this.hoverEffect.bind(this, i)}>
+                <li key={i} className={skillClasses} data-name={skill.name} onMouseOver={() => this.hoverEffect(i)}>
                     <img src={skill.img} alt="skill" />
                 </li>
             );
         });
 
         let skillLists = [];
-        let numberOfLists = Math.round(skillsetItems.length / (maxSkillsInOneList - 0.5));
-
-        while (skillLists.length < numberOfLists) {
-            skillLists.push('list');
-        }
-
+        let rowCount = 1;
         let currentSkill = 0;
-        let numberOfSkillsInLastList = 0;
-        let numberOfSkillsInThisList = 0;
 
-        skillLists = skillLists.map((skillList, i) => {
-            numberOfSkillsInThisList = 0;
-            let maxNumberOfSkillsInThisList = maxSkillsInOneList;
-            if (i % 2 !== 0) {
-                maxNumberOfSkillsInThisList--;
-            }
-
+        while (currentSkill < skillsetItems.length) {
+            let numberOfSkillsInThisList = maxSkillsInOneList + (rowCount - 1); // Increase number of icons per row
             let skillsInList = [];
-            while (skillsInList.length <= maxNumberOfSkillsInThisList && currentSkill < skillsetItems.length) {
+
+            while (skillsInList.length < numberOfSkillsInThisList && currentSkill < skillsetItems.length) {
                 skillsInList.push(skillsetItems[currentSkill]);
-                if (skillsetItems[currentSkill]) {
-                    numberOfSkillsInThisList++;
-                }
                 currentSkill++;
             }
 
-            skillsInList = _.without(skillsInList, undefined);
+            skillLists.push(skillsInList);
+            rowCount++;
+        }
 
-            // If they are both even or uneven.
-            if ((numberOfSkillsInLastList % 2 === 0 && numberOfSkillsInThisList % 2 === 0) || (numberOfSkillsInLastList % 2 !== 0 && numberOfSkillsInThisList % 2 !== 0)) {
-                // if it's the last list
-                if (i === skillLists.length - 1) {
-                    return <ul className="skill-list" key={i} style={{ marginRight: `${skillWidth}px` }}>{skillsInList}</ul>;
-                }
-            }
+        return skillLists.map((skillsInList, i) => (
+            <ul key={i} className={`skill-list ${i === 0 ? 'first-row' : ''}`}>{skillsInList}</ul>
+        ));
+    }
 
-            numberOfSkillsInLastList = numberOfSkillsInThisList;
-            return <ul className="skill-list" key={i}>{skillsInList}</ul>;
-        });
-
+    render() {
         return (
             <section className="toolbelt">
                 <Element name="toolbelt" />
                 <h2 className="title">My Toolbelt</h2>
                 <h3 className="subtitle">These are some of the tools I use to build websites</h3>
-                <div className="skills-container">{skillLists}</div>
+                <div className="categories-container">
+                    <div className="category-toolbelt">
+                        <img src={biIcon} alt="BI / Warehouse" className="category-icon" />
+                        <div className="skills-container">{this.renderSkills()}</div>
+                    </div>
+                    <div className="category-toolbelt">
+                        <img src={mlIcon} alt="Analytics / ML" className="category-icon" />
+                        <div className="skills-container">{this.renderSkills()}</div>
+                    </div>
+                    <div className="category-toolbelt">
+                        <img src={jsIcon} alt="Front / Viz" className="category-icon" />
+                        <div className="skills-container">{this.renderSkills()}</div>
+                    </div>
+                    <div className="category-toolbelt">
+                        <img src={cloudIcon} alt="Cloud / ETL" className="category-icon" />
+                        <div className="skills-container">{this.renderSkills()}</div>
+                    </div>
+                </div>
             </section>
         );
     }
